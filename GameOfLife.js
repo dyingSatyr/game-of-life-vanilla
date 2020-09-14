@@ -1,11 +1,11 @@
 export default class GameOfLife {
-  constructor(NUM_COLS, NUM_ROWS, BOX_SIZE) {
+  constructor(NUM_COLS, NUM_ROWS, BOX_SIZE, SPEED = 2000) {
     console.log("Initializing game of life.");
     this.NUM_COLS = NUM_COLS;
     this.NUM_ROWS = NUM_ROWS;
     this.BOX_SIZE = BOX_SIZE;
+    this.SPEED = SPEED;
     this.RAND_ALIVE_PROBABILITY = 0.2;
-    this.SPEED = 1000;
     this.simulationInterval = 0;
     this.simRunning = false;
     this.startBtn = document.getElementById("start");
@@ -79,6 +79,7 @@ export default class GameOfLife {
         newCell.classList.add("cell");
         newCell.setAttribute("data-row", `${i}`);
         newCell.setAttribute("data-column", `${j}`);
+        // newCell.innerHTML = `${i}-${j}`;
         newCell.style.width = `${this.BOX_SIZE}px`;
         newCell.style.height = `${this.BOX_SIZE}px`;
         if (gameState[i][j] === 1) {
@@ -110,9 +111,6 @@ export default class GameOfLife {
 
   decideFaith = (row, column, neighbours) => {
     let isAlive = this.gameState[row][column];
-    console.log(
-      `Cell [${row}-${column}] is alive = ${isAlive}, has neigh: ${neighbours}`
-    );
     if ((isAlive && neighbours < 2) || (isAlive && neighbours > 3)) {
       //die
       return 0;
@@ -127,7 +125,7 @@ export default class GameOfLife {
 
   simulate = () => {
     console.log("Simulation tick.");
-    let newState = [...this.gameState];
+    let newState = JSON.parse(JSON.stringify(this.gameState));
     this.gameState.forEach((row, i) => {
       row.forEach((column, j) => {
         let neighbours = this.countNeighbours(i, j);
