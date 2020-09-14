@@ -1,0 +1,39 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #f0f0f0;
+}
+
+header {
+  background-color: #333;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+#game {
+  display: grid;
+  padding: 20px;
+  grid-gap: 5px;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell {
+  box-sizing: border-box;
+  border: 1px solid rgb(187, 187, 187);
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.alive {
+  background: green;
+  border-color: green;
+}
