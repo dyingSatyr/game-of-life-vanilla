@@ -6,19 +6,19 @@ export default class GameOfLife {
     this.BOX_SIZE = BOX_SIZE;
     this.RAND_ALIVE_PROBABILITY = 0.2;
     this.SPEED = 1000;
+    this.simulationInterval = 0;
     this.simRunning = false;
     this.startBtn = document.getElementById("start");
     this.randBtn = document.getElementById("randomize");
     this.clearBtn = document.getElementById("clear");
     this.gameContainer = document.getElementById("game");
     this.gameState = this.clearGameState();
-    this.startGame();
   }
 
-  startGame = () => {
+  runGame = () => {
     console.log("Game Starting");
     this.gameContainer.style.gridTemplateColumns = `repeat(${this.NUM_COLS}, ${this.BOX_SIZE}px)`;
-    this.startBtn.addEventListener("click", this.start);
+    this.startBtn.addEventListener("click", this.startSimulation);
     this.randBtn.addEventListener("click", this.randomize);
     this.clearBtn.addEventListener("click", this.clear);
     this.draw(this.gameContainer, this.gameState);
@@ -44,13 +44,15 @@ export default class GameOfLife {
     }
   };
 
-  start = () => {
-    if (this.simRunning) {
-      console.log("Pausing simulation. Setting button to Start.");
-      this.startBtn.innerHTML = "Start";
-    } else if (!this.simRunning) {
+  startSimulation = () => {
+    if (!this.simRunning) {
       console.log("Starting simulation. Setting button to Pause.");
       this.startBtn.innerHTML = "Pause";
+      this.simulationInterval = setInterval(this.simulate, this.SPEED);
+    } else if (this.simRunning) {
+      console.log("Pausing simulation. Setting button to Start.");
+      this.startBtn.innerHTML = "Start";
+      clearInterval(this.simulationInterval);
     }
     this.simRunning = !this.simRunning;
   };
@@ -77,11 +79,62 @@ export default class GameOfLife {
         newCell.classList.add("cell");
         newCell.setAttribute("data-row", `${i}`);
         newCell.setAttribute("data-column", `${j}`);
+        newCell.style.width = `${this.BOX_SIZE}px`;
+        newCell.style.height = `${this.BOX_SIZE}px`;
         if (gameState[i][j] === 1) {
           newCell.classList.add("alive");
         }
         container.appendChild(newCell);
       }
     }
+  };
+
+  countNeighbours = (row, column) => {
+    let neighbours = 0;
+    if (this.gameState[row - 1]) {
+      if (this.gameState[row - 1][column - 1]) neighbours++;
+      if (this.gameState[row - 1][column]) neighbours++;
+      if (this.gameState[row - 1][column + 1]) neighbours++;
+    }
+
+    if (this.gameState[row][column - 1]) neighbours++;
+    if (this.gameState[row][column + 1]) neighbours++;
+
+    if (this.gameState[row + 1]) {
+      if (this.gameState[row + 1][column - 1]) neighbours++;
+      if (this.gameState[row + 1][column]) neighbours++;
+      if (this.gameState[row + 1][column + 1]) neighbours++;
+    }
+    return neighbours;
+  };
+
+  decideFaith = (row, column, neighbours) => {
+    let isAlive = this.gameState[row][column];
+    console.log(
+      `Cell [${row}-${column}] is alive = ${isAlive}, has neigh: ${neighbours}`
+    );
+    if ((isAlive && neighbours < 2) || (isAlive && neighbours > 3)) {
+      //die
+      return 0;
+    } else if (!isAlive && neighbours === 3) {
+      //come to life
+      return 1;
+    } else {
+      //don't change
+      return isAlive;
+    }
+  };
+
+  simulate = () => {
+    console.log("Simulation tick.");
+    let newState = [...this.gameState];
+    this.gameState.forEach((row, i) => {
+      row.forEach((column, j) => {
+        let neighbours = this.countNeighbours(i, j);
+        newState[i][j] = this.decideFaith(i, j, neighbours);
+      });
+    });
+    this.gameState = newState;
+    this.draw(this.gameContainer, this.gameState);
   };
 }
